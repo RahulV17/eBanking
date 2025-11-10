@@ -1,6 +1,10 @@
+
+server:
+  port: ${PORT}   # Or any port you want
+
 spring:
   application:
-   name : ebanking
+    name: ebanking
 
   profiles:
-   active : dev.
+    active: dev
