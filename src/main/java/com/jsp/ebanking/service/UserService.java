@@ -10,6 +10,7 @@ import com.jsp.ebanking.dto.OtpDto;
 import com.jsp.ebanking.dto.ResetPasswordDto;
 import com.jsp.ebanking.dto.ResponseDto;
 import com.jsp.ebanking.dto.SavingAccountDto;
+import com.jsp.ebanking.dto.TransferDto;
 import com.jsp.ebanking.dto.UserDto;
 
 public interface UserService {
@@ -35,5 +36,7 @@ public interface UserService {
 	ResponseEntity<ResponseDto> deposit(Principal principal, Map<String, Double> map);
 
 	ResponseEntity<ResponseDto> confirmPayment(Double amount, String razorpay_payment_id, Principal principal);
+
+	ResponseEntity<ResponseDto> transfer(Principal principal, TransferDto dto);
 
 }
