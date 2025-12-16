@@ -1,5 +1,11 @@
 package com.jsp.ebanking.dto;
 
-public class BankBalanceDto {
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
+@AllArgsConstructor
+@Data
+public class BankBalanceDto {
+	private Long accountNumber;
+	private Double balance;
 }

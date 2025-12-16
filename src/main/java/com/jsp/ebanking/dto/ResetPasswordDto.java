@@ -7,7 +7,6 @@ import lombok.Data;
 
 @Data
 public class ResetPasswordDto {
-
 	@NotNull(message = "Email is Required")
 	@Email(message = "Enter Proper Email Address")
 	private String email;

@@ -1,5 +1,8 @@
 package com.jsp.ebanking.dto;
 
-public class AccountNumberDto {
+import lombok.Data;
 
+@Data
+public class AccountNumberDto {
+	private Long accountNumber;
 }
