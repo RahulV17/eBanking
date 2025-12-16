@@ -12,15 +12,21 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${EMAIL}
-    password: ${APP_PASSWORD}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls: 
-            enable:true
+      host: smtp.gmail.com
+      port: 587
+      username: ${EMAIL}
+      password: ${APP_PASSWORD}
+      properties:
+        mail:
+          smtp:
+            auth: true
+            starttls:
+              enable: true
+              required: true
 server:
   port: ${PORT}
+jwt:
+  secret: ${JWT_KEY}
+razorpay:
+  key: ${RZRPY_KEY}	
+  secret: ${RZRPY_SECRET}
