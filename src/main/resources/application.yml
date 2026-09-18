@@ -1,7 +1,0 @@
-spring:
-  application:
-    name: ebanking
-
-  profiles:
-    active:
-    - dev
