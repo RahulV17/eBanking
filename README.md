@@ -1,143 +1,85 @@
-# eBanking
+# eBanking Portfolio
 
-A backend application for internet banking built with Spring Boot. The project provides user management, account operations, payment processing, authentication, caching, and API documentation.
+![Landing Page](docs/assets/screenshot-01-landing.png)
+
+A full-stack internet banking demo with real authentication, test-mode payments, AI assistant, and a 3D animated landing page.
 
 ## Features
 
-* User and account management
-* CRUD operations for banking entities
-* JWT-based authentication and authorization
-* Razorpay payment integration
-* Redis caching support
-* OpenAPI/Swagger documentation
-* Spring Boot Actuator monitoring
-* Email service integration
+- User registration with OTP verification
+- JWT authentication with session revocation
+- Savings account creation and management
+- Deposits via Razorpay payment gateway
+- Instant transfers with confirmation
+- AI-powered financial assistant with privacy consent
+- Admin dashboard for account approval
+- 3D animated landing page (React Three Fiber)
 
-## Technology Stack
+## Screenshots
 
-* Java 17
-* Spring Boot
-* Spring Security
-* Spring Data JPA
-* Spring Mail
-* Spring Data Redis
-* MySQL
-* Redis
-* JWT (io.jsonwebtoken)
-* MapStruct
-* Lombok
-* Razorpay Java SDK
-* Springdoc OpenAPI
+| Landing | Dashboard | Transfers | Profile |
+|---------|-----------|-----------|---------|
+| ![Landing](docs/assets/screenshot-01-landing.png) | ![Dashboard](docs/assets/screenshot-02-dashboard.png) | ![Transfers](docs/assets/screenshot-03-transfers.png) | ![Profile](docs/assets/screenshot-04-profile.png) |
+
+## Quick Start
+
+### Prerequisites
+- Java 17+, Node.js 18+, MySQL 8+, Redis
+
+### Backend
+```bash
+cd backend
+cp .env.example .env
+# Edit .env with your credentials
+mvnw.cmd spring-boot:run    # Windows
+./mvnw spring-boot:run       # Linux/macOS
+```
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open http://localhost:5173 — the Vite proxy forwards `/api/*` to `localhost:8080`.
+
+See [HOW_TO_RUN.md](HOW_TO_RUN.md) for full setup instructions.
+
+## Architecture
+
+| Layer | Technology |
+|-------|------------|
+| **Backend** | Spring Boot 3.5.7, Spring Security, JPA/Hibernate, Redis |
+| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, Framer Motion, R3F |
+| **Database** | MySQL |
+| **Cache** | Redis |
+| **Payments** | Razorpay (test mode) |
 
 ## Project Structure
 
-```text
-src/main/java/com/jsp/ebanking
-├── controller
-├── service
-├── repository
-├── entity
-├── dto
-├── mapper
-├── config
-└── util
-
-src/main/resources
-├── application.properties
-└── static
-
-pom.xml
 ```
+backend/           Spring Boot REST API
+  src/main/java/   Controllers, services, repositories, entities, DTOs
+  src/main/resources/  Configuration (application.yml, .env)
 
-## Prerequisites
+frontend/          React SPA
+  src/
+    api/           Axios client + interceptors
+    components/    Shared UI (Hero3D, Counter, VirtualCard)
+    features/      Auth module (login, register, forgot password)
+    hooks/         Custom hooks (useSmoothScroll, useLogout)
+    pages/         Route-level components
+    stores/        Zustand state (auth, ui)
+    types/         TypeScript definitions
 
-* Java 17
-* Maven 3.8 or higher
-* MySQL Server
-* Redis Server (optional)
-* Razorpay account and API credentials (for payment functionality)
-
-## Configuration
-
-Configure the application in `src/main/resources/application.properties`.
-
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/ebanking
-spring.datasource.username=your_db_user
-spring.datasource.password=your_db_password
-
-spring.jpa.hibernate.ddl-auto=update
-
-spring.redis.host=localhost
-spring.redis.port=6379
-
-jwt.secret=your_jwt_secret
-
-razorpay.key=your_razorpay_key
-razorpay.secret=your_razorpay_secret
-```
-
-Do not commit secrets or credentials to version control. Use environment variables or a secret management solution for production deployments.
-
-## Running the Application
-
-Using Maven Wrapper:
-
-Windows:
-
-```bash
-mvnw.cmd spring-boot:run
-```
-
-Linux/macOS:
-
-```bash
-./mvnw spring-boot:run
-```
-
-Build the project:
-
-```bash
-./mvnw clean package
-```
-
-Run the generated JAR:
-
-```bash
-java -jar target/ebanking-0.0.1-SNAPSHOT.jar
+docs/              Documentation and screenshots
 ```
 
 ## API Documentation
 
-Swagger UI is available at:
-
-```text
-http://localhost:8080/swagger-ui/index.html
-```
-
-## Testing
-
-Run tests using:
-
-```bash
-./mvnw test
-```
-
-## Development Notes
-
-* Spring Boot DevTools can be used for faster development.
-* Actuator endpoints provide health and monitoring information.
-* Consider adding Flyway or Liquibase for database migrations.
-* Review security settings before deploying to production.
-
-## Contributing
-
-1. Fork the repository.
-2. Create a feature branch.
-3. Make changes and run tests.
-4. Commit your changes.
-5. Open a pull request.
+Swagger UI: http://localhost:8080/swagger-ui/index.html
 
 ## License
 
-No license has been specified yet. Add a LICENSE file if you plan to distribute or open-source the project.
+MIT

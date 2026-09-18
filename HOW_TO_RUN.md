@@ -1,86 +1,116 @@
-# eBanking — How to Run (verified walkthrough)
+# How to Run eBanking
 
-Every step below was executed live on this machine (2026-09-10) before writing: backend started in ~11s, Vite ready in ~19s, and a login request through the browser port (5173) reached the backend and returned a real API response. Paths are for this machine.
+Complete guide to running the eBanking application locally.
 
-## What you need running before you start
+## Prerequisites
 
-**MySQL and Redis are already Windows services on this machine and are running** (verified: 3306 and 6379 listening). If you reboot and they didn't start:
+- **Java 17+**
+- **Node.js 18+** and npm
+- **MySQL 8+** running on port 3306
+- **Redis** running on port 6379
+- **Maven 3.8+** (or use the included `mvnw`/`mvnw.cmd`)
 
-    # PowerShell (admin) — or use services.msc
-    Start-Service MySQL80      # check the exact service name: Get-Service *mysql*
-    Start-Service Redis
+## Quick Start
 
-If Redis isn't installed as a service, start it manually:
-    "C:\Program Files\Redis\redis-server.exe"
+### 1. Database Setup
 
-## 1. Start the backend (port 8080)
+Ensure MySQL is running and create the database:
 
-Open a terminal in **D:\Claude-Project\Ebanking\backend**.
+```sql
+CREATE DATABASE IF NOT EXISTS eBanking;
+```
 
-The backend does NOT read `backend\.env` by itself (no dotenv library) — you must load the variables into the environment first.
+The app uses `ddl-auto: update` — tables are created automatically on first boot.
 
-**Git Bash (what the agent shell uses — verified working):**
+### 2. Backend Setup
 
-    cd /d/Claude-Project/Ebanking/backend
-    set -a && . ./.env && set +a
-    "C:/Program Files/Apache/Maven/apache-maven-3.9.16-bin/apache-maven-3.9.16/bin/mvn.cmd" spring-boot:run
+```bash
+cd backend
+```
 
-**PowerShell (no extra tooling):**
+Copy the environment template:
 
-    cd D:\Claude-Project\Ebanking\backend
-    Get-Content .env | ForEach-Object { $k,$v = $_ -split '=',2; [Environment]::SetEnvironmentVariable($k,$v) }
-    mvn spring-boot:run
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your actual credentials (MySQL, Redis, JWT secret, Razorpay keys, Gmail app password for OTP).
+
+Start the backend:
+
+```bash
+# Linux/macOS
+./mvnw spring-boot:run
+
+# Windows
+mvnw.cmd spring-boot:run
+```
 
 Wait for: `Started EbankingApplication in X seconds` and `Tomcat started on port 8080`.
-First boot takes ~11s; it also auto-creates/updates the DB schema (`ddl-auto: update`) — no SQL scripts to run.
 
-Verify: open http://localhost:8080/ in a browser → redirects to Swagger UI (dev profile). API base: http://localhost:8080/api/v1
+Verify: open http://localhost:8080/ → redirects to Swagger UI.
 
-## 2. Start the frontend (port 5173)
+API base URL: `http://localhost:8080/api/v1`
 
-New terminal:
+### 3. Frontend Setup
 
-    cd D:\Claude-Project\Ebanking\frontend
-    npm run dev
+In a new terminal:
 
-Wait for: `VITE ready` + `Local: http://localhost:5173/` (first boot ~20s — it re-optimizes deps after the dependency changes).
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-Open **http://localhost:5173** — that's the app. The Vite dev proxy forwards `/api/*` to `localhost:8080`, so no CORS dance as long as you use 5173 (not 8080) in the browser.
+Wait for: `VITE ready` + `Local: http://localhost:5173/`
 
-## 3. Use it (happy path)
+Open http://localhost:5173 — the Vite dev proxy forwards `/api/*` to `localhost:8080`, so no CORS configuration is needed.
 
-1. **Sign Up** (5173 → /register): fill the form — no role dropdown anymore (users are always USER now, even if the API is called directly with role=ADMIN).
-2. Check your inbox for the **6-digit OTP** (sent from the Gmail in `.env`; ~5 min validity, 5 wrong tries = 15-min lockout).
-3. Log in → **Accounts** page → create your savings account (₹0, pending admin approval).
-4. **Log in as your admin** (your pre-existing admin account from the DB) → Admin page → approve the pending account.
-5. Back as the user → **Deposits** → amount (₹0.01–₹1,00,000) → Razorpay test checkout.
-6. **Transfers** → send by mobile/account — you now get a confirmation modal first.
-7. **AI Chat**: first enable "Data Sharing with Third Parties" in Profile → Privacy settings, or the assistant will tell you it's gated.
+## Using the Application
 
-## Stop everything
+1. **Sign Up** → fill the registration form
+2. Check your inbox for the **6-digit OTP** (valid for 5 minutes, 5 wrong attempts = 15-minute lockout)
+3. Log in → **Accounts** page → create your savings account
+4. **Deposits** → enter amount (₹0.01 – ₹1,00,000) → complete Razorpay test checkout
+5. **Transfers** → send by mobile or account number
+6. **AI Chat** → first enable "Data Sharing with Third Parties" in Profile → Privacy settings
 
-    Ctrl+C in the frontend terminal, then Ctrl+C in the backend terminal. (MySQL/Redis services stay running — leave them.)
+## Default Roles
 
-## Troubleshooting (the real gotchas on this machine)
+- New users are always registered as `USER` (no self-registration as `ADMIN`)
+- To create an admin, promote an existing user via database: `UPDATE user SET role = 'ADMIN' WHERE email = 'user@example.com'`
 
-| Symptom | Fix |
-|---|---|
-| Backend exits instantly, DB errors | MySQL service not running (step 0). Check `netstat -an \| findstr 3306`. |
-| Backend exits with Redis connection refused | Redis not running. `"C:\Program Files\Redis\redis-server.exe"` |
-| `mvn` not found / classworlds error | Plain `mvn` is broken in some shells here — use the full path `"C:/Program Files/Apache/Maven/apache-maven-3.9.16-bin/apache-maven-3.9.16/bin/mvn.cmd"` or `mvnw.cmd`. |
-| Vite proxy 404s/ECONNREFUSED | Backend not up, or multiple node processes fighting over 5173 — kill all node (`taskkill /F /IM node.exe`), kill all java if needed, restart both. Only one of each. |
-| OTP email never arrives | Gmail APP_PASSWORD in `.env` stale/wrong — backend logs the mail error. |
-| AI chat returns config error | OPENROUTER_API_KEY missing/invalid in `.env` (dev-only feature). |
-| Login says "Too many failed attempts" | 5 wrong passwords = 15-min lock (working as designed since wave 2). |
+## Stopping
 
-## The `.env` file (backend\.env — never commit it)
+Press `Ctrl+C` in each terminal to stop the servers.
 
-DB_URL, DB_UN, DB_PWD (MySQL) · REDIS_HOST, REDIS_PORT · EMAIL, APP_PASSWORD (OTP mail) · PORT (8080) · JWT_KEY · RZRPY_KEY, RZRPY_SECRET (Razorpay test keys) · OPENROUTER_API_KEY (AI chat, dev only)
+## Troubleshooting
 
-All keys must be present or boot fails with a placeholder-resolution error naming the missing one — that error is your fastest diagnostic.
+| Symptom | Solution |
+|---------|----------|
+| Backend exits with DB errors | MySQL not running — start the MySQL service |
+| Backend exits with Redis refused | Redis not running — start Redis |
+| `mvn` not found | Use `./mvnw` (Linux/macOS) or `mvnw.cmd` (Windows) |
+| Vite proxy 404s | Backend not running or port mismatch — ensure backend is on :8080 |
+| OTP email never arrives | Check Gmail app password in `.env` |
+| AI chat returns error | `OPENROUTER_API_KEY` missing/invalid in `.env` |
+| Login: "Too many failed attempts" | 5 wrong attempts = 15-minute lockout (by design) |
+| Maven build fails | Ensure Java 17+ is the active JDK (`java -version`) |
 
-## Smoke tests after our fix waves (quick)
+## Environment Variables Reference
 
-- Register via curl with `"role":"ADMIN"` → created user gets USER (verify in Admin → Users).
-- POST /api/v1/auth/forgot-password/{random@example.com} → same 200 response as a real email (no oracle).
-- Transfer with tampered amount in the body → server uses the Razorpay order amount, not the body.
+See `backend/.env.example` for all required variables.
+
+## Production Build
+
+```bash
+# Backend
+cd backend
+./mvnw clean package
+java -jar target/ebanking-0.0.1-SNAPSHOT.jar
+
+# Frontend
+cd frontend
+npm run build      # Output in dist/
+npm run preview    # Preview production build
+```
